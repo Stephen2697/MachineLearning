@@ -1,1 +1,7 @@
-id,age,workclass,fnlwgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country,target,
+Feature Name,Count,Missing %,Cardinality,Min Value,1st Quartile,Mean,Median,3rd Quartile,Max,Standard Deviation
+age,30940,0,72,17,28,38.56,37,48,90,13.64
+fnlwgt,30940,0,20880,12285,117849,189786.4,178384,237318,1484705,105406.39
+education-num,30940,0,16,1,9,10.08,10,12,16,2.57
+capital-gain,30940,0,119,0,0,1081.81,0,0,99999,7443.77
+capital-loss,30940,0,91,0,0,86.57,0,0,4356,401.71
+hours-per-week,30940,0,93,1,40,40.41,40,45,99,12.34

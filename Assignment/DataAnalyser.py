@@ -9,21 +9,25 @@
 import sys, os
 import pandas as pd
 import jupyter as jp
+import numpy as np
 
 #-------Define Constants
 FILEINPUT_TXT = "./Data/feature_names.txt"
 FILEINPUT_CSV = "./Data/dataset.csv"
 FILEOUTPUT_CONT = "./Output/C16377163CONT.csv"
 FILEOUTPUT_CAT = "./Output/C16377163CAT.csv"
+CONT_COL_LIST = ["Feature Name","Count","Missing %","Cardinality","Min Value","1st Quartile","Mean","Median","3rd Quartile","Max", "Standard Deviation"]
+CAT_COL_LIST = ["Feature Name","Count","Missing %","Cardinality","Modal Value","Mode FreQ","Mode %","2nd Modal Value","2nd Mode FreQ","2nd Mode %"]
+MODE_ERROR = "NoValidMode"
+
+#-------Initialise Global Variables
 HEADING_LIST = []
 CAT_LIST = []
 CONT_LIST = []
 INPUT_DATAFRAME = None
-OUTPUT_DATAFRAME = None
+OUTPUT_DATAFRAME_CONT = pd.DataFrame(columns=CONT_COL_LIST)
+OUTPUT_DATAFRAME_CAT = pd.DataFrame(columns=CAT_COL_LIST)
 
-#print(INPUT_DATAFRAME.iloc[[23]])
-#for index, col in INPUT_DATAFRAME.iterrows():
-#    print(index)
 
 #-------Define Functions
 def buildInputDataFrame():
@@ -45,63 +49,120 @@ def separateDataTypes():
     CAT_LIST = list(set(HEADING_LIST) - set(CONT_LIST))
 
 def processContinuous(col):
+	global OUTPUT_DATAFRAME_CONT
+	rowList = [col]
+	
 	#isolate specific column where string col refers to df[[col]]
 	isolateDF = INPUT_DATAFRAME[[col]]
+	
 	#Count
-	count = isolateDF.shape[0]
+	rowList.append(isolateDF.shape[0])
+	
 	#Calculate MissingPer
 	nanSum = isolateDF.isna().sum()
 	missingPer = 0
 	if int(nanSum):
-		missingPer = round(float(int(nanSum)/count)*100,2)
+		missingPer = round(float(int(nanSum)/isolateDF.shape[0])*100,2)
+	rowList.append(missingPer)
+	
 	#Cardinality - number of distinct answers - return series
-	cardinality = int(isolateDF.apply(pd.Series.nunique))
+	rowList.append(int(isolateDF.apply(pd.Series.nunique)))
+	
 	#Min
-	min = round(float(isolateDF.min()),2)
+	rowList.append(int(isolateDF.min()))
+	
 	#1stQuart
-	q1 = round(float(isolateDF.quantile(.25)),2)
+	rowList.append(int(isolateDF.quantile(.25)))
+	
 	#Mean
-	mean = round(float(isolateDF.mean()), 2)
+	rowList.append(round(float(isolateDF.mean()), 2))
+	
 	#Median
-	median = round(float(isolateDF.median()),2)
+	rowList.append(int(isolateDF.median()))
+	
 	#3rdQuart
-	q3 = round(float(isolateDF.quantile(.75)),2)
+	rowList.append(int(isolateDF.quantile(.75)))
+	
 	#Max
-	max = round(float(isolateDF.max()),2)
+	rowList.append(int(isolateDF.max()))
+	
 	#StandDev
-	stdDev = round(float(isolateDF.std()),2)
+	rowList.append(round(float(isolateDF.std()),2))
 	
-	print((col + ": Count [" + str(count) + "], Missing Per: [" + str(missingPer) + "%],"+ " Card: [" + str(cardinality) + "], Min: [" + str(min)+ "], 1st  Quartile: [" + str(q1)+ "], Mean: [" + str(mean) + "], Median: [" + str(median) + "], 3rd Quartile: [" + str(q3) + "], Max: [" + str(max) + "], Stadard Deviation: [" + str(stdDev) +"]").upper())
+	#Add row to dataframe
+	tempOUTPUT_DATAFRAME_CONT = pd.DataFrame([rowList], columns=CONT_COL_LIST)
+	OUTPUT_DATAFRAME_CONT = OUTPUT_DATAFRAME_CONT.append(tempOUTPUT_DATAFRAME_CONT, ignore_index=True)
 	
-	print("\n\n###############")
 	
 def processCategorical(col):
-#	print("CAT ["+ col + "]")
-	#Count
-	count = INPUT_DATAFRAME.shape[0]
+	global OUTPUT_DATAFRAME_CAT
+	rowList = [col]
 	
-	#MissingPer
-	nanSum = INPUT_DATAFRAME[[col]].isna().sum()
+	#isolate specific column where string col refers to df[[col]]
+	isolateDF = INPUT_DATAFRAME[[col]]
+	
+	#Count
+	rowList.append(isolateDF.shape[0])
+	
+	#Calculate MissingPer
+	nanSum = isolateDF.isna().sum()
 	missingPer = 0
 	if int(nanSum):
-		missingPer = round(float(int(nanSum)/count)*100,2)
+		missingPer = round(float(int(nanSum)/isolateDF.shape[0])*100,2)
+	rowList.append(missingPer)
 	
-	#Cardinality - number of distinct answers
-#	print(INPUT_DATAFRAME.apply(pd.Series.nunique))
+	#Cardinality - number of distinct answers - return series
+	rowList.append(int(isolateDF.apply(pd.Series.nunique)))
 	
+	#Mode
+	#Get Modal Value and number of times it occurs
+	structModeNames = isolateDF[col].value_counts()[:2].index.tolist()
+	structModeFreqs = isolateDF[col].value_counts()[:2].values
 	
-#	test output
-#	print((col + ": Count [" + str(count) + "], Missing Per: [" + str(missingPer) + "%]\n").upper())
+	#I.E. mode does not exist if our mode returned does not occur more than once
+	if (structModeFreqs[0] == 1):
+		#Mode
+		rowList.append(MODE_ERROR)
+		#modeFreq
+		rowList.append(MODE_ERROR)
+		#modePercent
+		rowList.append(MODE_ERROR)
+		#mode_2
+		rowList.append(MODE_ERROR)
+		#modeFreq_2
+		rowList.append(MODE_ERROR)
+		#modePercent_2
+		rowList.append(MODE_ERROR)
+	else:
+		#mode
+		rowList.append(structModeNames[0])
+		#modeFreq
+		rowList.append(structModeFreqs[0])
+		#modePercent
+		rowList.append( round( structModeFreqs[0]/isolateDF.shape[0],2))
+		#mode_2
+		rowList.append(structModeNames[1])
+		#modeFreq_2
+		rowList.append(structModeFreqs[1])
+		#modePercent_2
+		rowList.append(round(structModeFreqs[1]/isolateDF.shape[0],2))
+
+	#Add row to dataframe
+	tempOUTPUT_DATAFRAME = pd.DataFrame([rowList], columns=CAT_COL_LIST)
+	OUTPUT_DATAFRAME_CAT = OUTPUT_DATAFRAME_CAT.append(tempOUTPUT_DATAFRAME, ignore_index=True)
 	
 def buildOutputDataFrame():
-    for col in INPUT_DATAFRAME.columns:
-#		Process Continuous Data
-        if col in CONT_LIST:
-            processContinuous(col)
-		
+	index = 0
+	for col in INPUT_DATAFRAME.columns:
+#	Process Continuous Data
+		if col in CONT_LIST:
+			processContinuous(col)
 #		Process Categorical Data
-        elif col in CAT_LIST:
-            processCategorical(col)
+		elif col in CAT_LIST:
+			if index != 0:
+				processCategorical(col)
+			#Exclude Id column - not to be processed
+			index += 1
         
         
 #-------Function Calls & General Logic
@@ -111,4 +172,11 @@ separateDataTypes()
 
 
 buildOutputDataFrame()
+print("Continuous Data Output DF\n")
+export_csv = OUTPUT_DATAFRAME_CONT.to_csv (FILEOUTPUT_CONT, index = None, header=True)
+
+print("Categorical Data Output DF\n")
+export_csv = OUTPUT_DATAFRAME_CAT.to_csv (FILEOUTPUT_CAT, index = None, header=True)
+
 exit()
+
