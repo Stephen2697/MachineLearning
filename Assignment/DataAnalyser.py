@@ -45,28 +45,35 @@ def separateDataTypes():
     CAT_LIST = list(set(HEADING_LIST) - set(CONT_LIST))
 
 def processContinuous(col):
-#	print("CONT ["+ col + "]")
-#	DataFrame.append()
-
+	#isolate specific column where string col refers to df[[col]]
+	isolateDF = INPUT_DATAFRAME[[col]]
 	#Count
-	count = INPUT_DATAFRAME.shape[0]
-	
-	#MissingPer
-	nanSum = INPUT_DATAFRAME[[col]].isna().sum()
+	count = isolateDF.shape[0]
+	#Calculate MissingPer
+	nanSum = isolateDF.isna().sum()
 	missingPer = 0
 	if int(nanSum):
 		missingPer = round(float(int(nanSum)/count)*100,2)
-		
-		
-	#Cardinality
+	#Cardinality - number of distinct answers - return series
+	cardinality = int(isolateDF.apply(pd.Series.nunique))
 	#Min
+	min = round(float(isolateDF.min()),2)
 	#1stQuart
+	q1 = round(float(isolateDF.quantile(.25)),2)
 	#Mean
+	mean = round(float(isolateDF.mean()), 2)
 	#Median
+	median = round(float(isolateDF.median()),2)
 	#3rdQuart
+	q3 = round(float(isolateDF.quantile(.75)),2)
 	#Max
+	max = round(float(isolateDF.max()),2)
 	#StandDev
-	print((col + ": Count [" + str(count) + "], Missing Per: [" + str(missingPer) + "%]\n").upper())
+	stdDev = round(float(isolateDF.std()),2)
+	
+	print((col + ": Count [" + str(count) + "], Missing Per: [" + str(missingPer) + "%],"+ " Card: [" + str(cardinality) + "], Min: [" + str(min)+ "], 1st  Quartile: [" + str(q1)+ "], Mean: [" + str(mean) + "], Median: [" + str(median) + "], 3rd Quartile: [" + str(q3) + "], Max: [" + str(max) + "], Stadard Deviation: [" + str(stdDev) +"]").upper())
+	
+	print("\n\n###############")
 	
 def processCategorical(col):
 #	print("CAT ["+ col + "]")
@@ -78,8 +85,13 @@ def processCategorical(col):
 	missingPer = 0
 	if int(nanSum):
 		missingPer = round(float(int(nanSum)/count)*100,2)
-		
-	print((col + ": Count [" + str(count) + "], Missing Per: [" + str(missingPer) + "%]\n").upper())
+	
+	#Cardinality - number of distinct answers
+#	print(INPUT_DATAFRAME.apply(pd.Series.nunique))
+	
+	
+#	test output
+#	print((col + ": Count [" + str(count) + "], Missing Per: [" + str(missingPer) + "%]\n").upper())
 	
 def buildOutputDataFrame():
     for col in INPUT_DATAFRAME.columns:
@@ -89,12 +101,14 @@ def buildOutputDataFrame():
 		
 #		Process Categorical Data
         elif col in CAT_LIST:
-            
             processCategorical(col)
         
         
 #-------Function Calls & General Logic
 buildInputDataFrame()
 separateDataTypes()
+
+
+
 buildOutputDataFrame()
 exit()
