@@ -35,7 +35,7 @@ http://cseweb.ucsd.edu/classes/sp15/cse190-c/reports/sp15/048.pdf
 * Also Tested in Jupyter Notebook
 
 ### Sample Output Graphs
-![Output Graph](https://www.dropbox.com/h?preview=ML_graph.png)
+![Output Graph](https://github.com/Stephen2697/ML/blob/master/ML_graph.png)
 
 ### Output Files:
 - ContinuousDataQualityReportABT.csv
