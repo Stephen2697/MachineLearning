@@ -1,8 +1,8 @@
 # DataAnalyser .py [v1.0]
 * * *
-###### Creator: Stephen Alger
-###### Machine Learening Introduction - Modelling Data, Deriving Modal Values, Measures of Central Tendency, Variation & Standard Deviation.
-###### Last Update: 29 October 2019
+##### Creator: Stephen Alger
+##### Machine Learening Introduction - Modelling Data, Deriving Modal Values, Measures of Central Tendency, Variation & Standard Deviation.
+##### Last Update: 29 October 2019
 <br/>
 
 ### Program Descriptor: 
