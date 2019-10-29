@@ -10,14 +10,16 @@ import sys, os
 import pandas as pd
 import jupyter as jp
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 #-------Define Constants
 FILEINPUT_TXT = "./Data/feature_names.txt"
 FILEINPUT_CSV = "./Data/dataset.csv"
 FILEOUTPUT_CONT = "./Output/C16377163CONT.csv"
 FILEOUTPUT_CAT = "./Output/C16377163CAT.csv"
-CONT_COL_LIST = ["Feature Name","Count","Missing %","Cardinality","Min Value","1st Quartile","Mean","Median","3rd Quartile","Max", "Standard Deviation"]
-CAT_COL_LIST = ["Feature Name","Count","Missing %","Cardinality","Modal Value","Mode FreQ","Mode %","2nd Modal Value","2nd Mode FreQ","2nd Mode %"]
+CONT_COL_LIST = ["FEATURENAME","Count","Missing %","Cardinality","Min Value","1st Quartile","Mean","Median","3rd Quartile","Max", "Standard Deviation"]
+CAT_COL_LIST = ["FEATURENAME","Count","Missing %","Cardinality","Modal Value","Mode FreQ","Mode %","2nd Modal Value","2nd Mode FreQ","2nd Mode %"]
 MODE_ERROR = "NoValidMode"
 
 #-------Initialise Global Variables
@@ -38,8 +40,29 @@ def buildInputDataFrame():
         feature_Names = open(FILEINPUT_TXT , "r")
         HEADING_LIST.append(feature.rstrip('\n'))
         
+	
     INPUT_DATAFRAME = pd.read_csv(FILEINPUT_CSV,names=HEADING_LIST, keep_default_na=False, na_values=[' ?','',' ','?'])
-    
+    plotAge()
+
+def plotAge():
+	global INPUT_DATAFRAME
+	plt.figure("Data Analytics - Stephen Alger")
+	INPUT_DATAFRAME['hours-per-week'].hist()
+	plt.title('Age Distribution Histogram')
+	plt.xlabel('Age')
+	plt.ylabel('Entries')
+	plt.show()
+	
+	plt.figure("Data Analytics - Stephen Alger")
+	INPUT_DATAFRAME['age'].hist()
+	plt.title('Age Distribution Histogram')
+	plt.xlabel('Age')
+	plt.ylabel('Entries')
+	plt.show()
+	
+	
+	
+	
 def separateDataTypes():
     global INPUT_DATAFRAME
     global CAT_LIST
@@ -147,6 +170,7 @@ def processCategorical(col):
 		#modePercent_2
 		rowList.append(round(structModeFreqs[1]/isolateDF.shape[0],2))
 
+	
 	#Add row to dataframe
 	tempOUTPUT_DATAFRAME = pd.DataFrame([rowList], columns=CAT_COL_LIST)
 	OUTPUT_DATAFRAME_CAT = OUTPUT_DATAFRAME_CAT.append(tempOUTPUT_DATAFRAME, ignore_index=True)
@@ -167,6 +191,7 @@ def buildOutputDataFrame():
         
 #-------Function Calls & General Logic
 buildInputDataFrame()
+
 separateDataTypes()
 
 
